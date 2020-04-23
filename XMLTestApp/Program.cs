@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+
 using System.Xml;
+using System.Xml.Serialization;
 using System.Xml.Linq;
 
 namespace XMLTestApp
@@ -106,18 +110,37 @@ namespace XMLTestApp
 
             new_x_doc.Save("TestData2.xml");
 
+            var serializator = new XmlSerializer(typeof(List<Group>));
+
+            using(var data_file = File.CreateText("TestData3.xml"))
+                serializator.Serialize(data_file, decanat);
+
+            List<Group> decanat2 = null;
+            using (var data_file = File.OpenText("TestData3.xml"))
+                decanat2 = (List<Group>)serializator.Deserialize(data_file);
+
+            BinaryFormatter formatter = new BinaryFormatter();
+
+            using (var data_file = File.Create("TestData.bin"))
+                formatter.Serialize(data_file, decanat);
+                
+            List<Group> decanat3 = null;
+            using (var data_file = File.Open("TestData.bin", FileMode.Open))
+                decanat3 = (List<Group>) formatter.Deserialize(data_file);
 
             Console.ReadLine();
         }
     }
 
-    class Group
+    [Serializable]
+    public class Group
     {
         public string Name { get; set; }
         public List<Student> Students { get; set; } = new List<Student>();
     }
 
-    class Student
+    [Serializable]
+    public class Student
     {
         public int Id { get; set; }
         public string Name { get; set; }
