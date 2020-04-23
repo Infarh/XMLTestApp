@@ -73,7 +73,39 @@ namespace XMLTestApp
                 decanat.Add(group);
             }
 
-            
+            //XmlDocument new_xml = new XmlDocument();
+
+            //var xml_groups = xml_doc.CreateElement("Groups");
+
+            //foreach (var group in decanat)
+            //{
+            //    var xml_group = xml_groups.AppendChild(new_xml)
+            //}
+
+            XDocument x_document = XDocument.Load(file_name);
+
+            foreach (var student in x_document.Descendants("Student"))
+            {
+                Console.WriteLine("Группа: {0}", student.Parent.Attribute("Name").Value);
+                Console.WriteLine("Id: {0}", student.Attribute("Id").Value);
+                Console.WriteLine("Name: {0}", student.Descendants("Name").Single().Value);
+            }
+
+            XDocument new_x_doc = new XDocument(
+                new XElement("Groups", 
+                    decanat.Select(g => new XElement("Group", 
+                        new XAttribute("Name", g.Name),
+                        g.Students.Select(student => new XElement("Student", 
+                            new XAttribute("Id", student.Id),
+                            new XAttribute("Rating", student.Rating),
+                            new XElement("Name", student.Name),
+                            new XElement("Surname", student.Surname),
+                            new XElement("Patronymic", student.Patronymic),
+                            new XElement("Birthday", student.Birthday.ToShortDateString())
+                            ))))));
+
+            new_x_doc.Save("TestData2.xml");
+
 
             Console.ReadLine();
         }
